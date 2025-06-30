@@ -1,0 +1,101 @@
+{
+  "name": "windmill-dashboard",
+  "version": "1.0.2",
+  "description": "A multi theme, completely accessible, with components and pages examples, ready for production dashboard.",
+  "scripts": {
+    "tailwind": "tailwindcss build public/assets/css/tailwind.css -o public/assets/css/tailwind.output.css",
+    "build": "env NODE_ENV=production postcss public/assets/css/tailwind.css -o public/assets/css/tailwind.output.css",
+    "cz": "git-cz",
+    "release": "release-it",
+    "start": "node server.js"
+  },
+  "author": "Estevan Maito <ejmaito@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@release-it/conventional-changelog": "1.1.4",
+    "@tailwindcss/custom-forms": "0.2.1",
+    "autoprefixer": "9.8.0",
+    "color": "3.1.2",
+    "commitizen": "4.1.2",
+    "cssnano": "4.1.10",
+    "cz-conventional-changelog": "3.2.0",
+    "postcss-cli": "7.1.1",
+    "release-it": "13.6.4",
+    "tailwindcss": "1.4.6",
+    "tailwindcss-multi-theme": "1.0.3"
+  },
+  "keywords": [
+    "tailwind",
+    "windmill",
+    "dashboard",
+    "template",
+    "admin"
+  ],
+  "release-it": {
+    "github": {
+      "release": true
+    },
+    "npm": {
+      "publish": false
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "angular",
+        "infile": "CHANGELOG.md"
+      }
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "main": "postcss.config.js",
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@sendgrid/mail": "^8.1.5",
+    "axios": "^1.9.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dompurify": "^3.2.6",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "express-mysql-session": "^3.0.3",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "fs-extra": "^11.3.0",
+    "google-auth-library": "^9.15.1",
+    "googleapis": "^148.0.0",
+    "helmet": "^8.1.0",
+    "imap": "^0.8.19",
+    "imap-simple": "^5.1.0",
+    "ioredis": "^5.6.0",
+    "jsonwebtoken": "^9.0.2",
+    "mailparser": "^3.7.3",
+    "mkcert": "^3.2.0",
+    "multer": "^1.4.5-lts.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.1",
+    "node-cron": "^4.0.7",
+    "node-imap": "^0.9.6",
+    "node-pop3": "^0.9.1",
+    "node-poplib-gowhich": "^1.0.2",
+    "nodemailer": "^6.10.1",
+    "passport": "^0.7.0",
+    "passport-azure-ad": "^4.3.5",
+    "passport-azure-ad-oauth2": "^0.0.4",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-microsoft": "^2.1.0",
+    "passport-outlook": "^3.0.0",
+    "poplib": "^0.1.7",
+    "quoted-printable": "^1.0.1",
+    "sanitize-html": "^2.17.0",
+    "simple-parser": "^0.0.0",
+    "socket.io": "^4.8.1",
+    "xlsx": "^0.18.5"
+  }
+}
