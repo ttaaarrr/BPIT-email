@@ -576,46 +576,56 @@
         }
       }
 
-      async function loadMonthlyEmailStats() {
-        try {
-          const year = document.getElementById('year-select').value;
-          const res = await fetch(`http://localhost:5000/api/reports/monthly-stats?year=${year}`);
-          const stats = await res.json();
+async function loadMonthlyEmailStats() {
+  try {
+    const year = document.getElementById('year-select').value;
+    const res = await fetch(`http://localhost:5000/api/reports/monthly-stats?year=${year}`);
+    const stats = await res.json();
 
-          if (!Array.isArray(stats)) throw new Error('Invalid response');
+    if (!Array.isArray(stats)) throw new Error('Invalid response');
 
-          const monthNames = [
-            'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-            'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
-          ];
+    const monthNames = [
+      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
 
-         let prev = null;
-          const rowsHtml = monthNames.map((name, index) => {
-            const found = stats.find(s => s.month === index + 1);
-            const count = found ? found.count : null;
-            const displayCount = count === null || count === 0 ? '-' : count;
+    let prev = null;
+    const currentDate = new Date();
+    const currentMonth = currentDate.getFullYear().toString() === year
+      ? currentDate.getMonth() + 1 // เดือนจริงๆ (1-12)
+      : 12; // ถ้าเลือกปีก่อนหน้า ให้แสดงครบทั้ง 12 เดือน
 
-            const diff = prev === null || count === null ? null : count - prev;
-             const diffDisplay = diff === null || diff === 0 ? '-' : (diff > 0 ? '+' + diff : diff);
+    const rowsHtml = monthNames.map((name, index) => {
+  const monthNumber = index + 1;
+  const found = stats.find(s => s.month === monthNumber);
+  const count = found ? found.count : null;
+  const displayCount = count === null || count === 0 ? '-' : count;
 
-            if (count !== null) prev = count;
+  const isFuture = monthNumber > currentMonth;
+  const diff = prev === null || count === null || isFuture ? null : count - prev;
+  const diffDisplay = isFuture || diff === null || diff === 0 ? '-' : (diff > 0 ? '+' + diff : diff);
 
-            return `
-              <tr class="border-t border-gray-200 dark:border-gray-600">
-                <td class="px-4 py-2">${name}</td>
-                <td class="px-4 py-2 text-right">${displayCount}</td>
-                <td class="px-4 py-2 text-right ${diff !== null ? `text-${diff >= 0 ? 'green' : 'red'}-500` : 'text-gray-400'}">
-                  ${diffDisplay}
-                </td>
-              </tr>
-            `;
-          }).join('');
-          document.getElementById('monthly-email-table-body').innerHTML = rowsHtml;
-        } catch (err) {
-          console.error('โหลดข้อมูลตารางรายเดือนไม่ได้:', err);
-        }
-      }
-   
+  if (!isFuture && count !== null) prev = count;
+
+  const colorClass = diffDisplay === '-' ? 'text-gray-400' : (diff > 0 ? 'text-green-500' : 'text-red-500');
+
+  return `
+    <tr class="border-t border-gray-200 dark:border-gray-600">
+      <td class="px-4 py-2">${name}</td>
+      <td class="px-4 py-2 text-right">${displayCount}</td>
+      <td class="px-4 py-2 text-right ${colorClass}">
+        ${diffDisplay}
+      </td>
+    </tr>
+  `;
+}).join('');
+
+    document.getElementById('monthly-email-table-body').innerHTML = rowsHtml;
+  } catch (err) {
+    console.error('โหลดข้อมูลตารางรายเดือนไม่ได้:', err);
+  }
+}
+
    </script>
   </main>
 

@@ -586,10 +586,10 @@
   <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">📊 My Email Summary</h3>
   
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div class="bg-white dark:bg-gray-700 p-4 rounded shadow text-center">
+    <!-- <div class="bg-white dark:bg-gray-700 p-4 rounded shadow text-center">
       <p class="text-sm text-gray-600 dark:text-gray-300">📥 Received</p>
       <p id="my-email-received" class="text-2xl font-bold text-blue-600 dark:text-blue-300">0</p>
-    </div>
+    </div> -->
 
     <div class="bg-white dark:bg-gray-700 p-4 rounded shadow text-center">
       <p class="text-sm text-gray-600 dark:text-gray-300">📤 Sent</p>
@@ -705,7 +705,7 @@ async function loadMyEmailSummary(email) {
   try {
     const [sentRes, receivedRes, customerRes] = await Promise.all([
       fetch(`http://localhost:5000/api/send-email/sent/count?email=${encodeURIComponent(email)}`, { credentials: 'include' }),
-      fetch(`http://localhost:5000/api/received/count?email=${encodeURIComponent(email)}`, { credentials: 'include' }),
+      // fetch(`http://localhost:5000/api/received/count?email=${encodeURIComponent(email)}`, { credentials: 'include' }),
       fetch(`http://localhost:5000/api/customers/my/count?email=${encodeURIComponent(email)}`, { credentials: 'include' })
     ]);
 

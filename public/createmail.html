@@ -605,26 +605,7 @@
         enctype="multipart/form-data"
         class="space-y-6 border-t pt-6 border-gray-200 dark:border-gray-700 max-w-5xl"
       >
-        <!-- ช่อง To (สำหรับใส่อีเมลหรือ @จังหวัด/@อำเภอ) -->
-        <!-- <div>
-          <label
-            for="to"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >ถึง (To)</label
-          >
-          <input
-            type="text"
-            id="to"
-            name="to"
-            placeholder="พิมพ์อีเมล หรือ @จังหวัด,@อำเภอ คั่นด้วยคอมม่า"
-            class="w-full mt-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            สามารถใช้ @ตามด้วยจังหวัดหรืออำเภอเพื่อส่งกลุ่ม เช่น
-            <code>@กรุงเทพมหานคร,@บางเขน</code>
-          </p>
-        </div> -->
-
+       
         <!-- ช่อง Subject -->
         <div>
           <label
@@ -884,7 +865,7 @@ async function loadAllCustomers() {
     const fileList = document.getElementById("fileList");
     const fileCount = document.getElementById("fileCount");
 
-   function renderFileList(files) {
+function renderFileList(files) {
   fileList.innerHTML = "";
   fileCount.textContent = "";
 
@@ -892,30 +873,57 @@ async function loadAllCustomers() {
 
   files.forEach((file, index) => {
     const li = document.createElement("li");
-    li.classList.add("flex", "items-center", "gap-2", "mb-2");
+    li.classList.add("flex", "items-start", "gap-3", "mb-3", "border", "rounded", "p-2");
 
+    const previewContainer = document.createElement("div");
+
+    // ==== 🔍 แสดง preview ตามประเภทไฟล์ ====
     if (file.type.startsWith("image/")) {
       const img = document.createElement("img");
       img.src = URL.createObjectURL(file);
       img.classList.add("h-20", "rounded");
-      li.appendChild(img);
+      previewContainer.appendChild(img);
       img.onload = () => URL.revokeObjectURL(img.src);
+    } else if (file.type === "application/pdf") {
+      const iframe = document.createElement("iframe");
+      iframe.src = URL.createObjectURL(file);
+      iframe.width = "100";
+      iframe.height = "100";
+      iframe.classList.add("border", "rounded");
+      previewContainer.appendChild(iframe);
+      iframe.onload = () => URL.revokeObjectURL(iframe.src);
+    } else if (file.name.endsWith(".doc") || file.name.endsWith(".docx")) {
+      const docIcon = document.createElement("div");
+      docIcon.innerHTML = `
+        <div class="w-20 h-20 bg-blue-100 flex items-center justify-center rounded">
+          <span class="text-blue-700 font-bold text-sm">DOC</span>
+        </div>
+      `;
+      previewContainer.appendChild(docIcon);
+    } else {
+      const genericIcon = document.createElement("div");
+      genericIcon.innerHTML = `
+        <div class="w-20 h-20 bg-gray-100 flex items-center justify-center rounded">
+          <span class="text-gray-700 font-semibold text-sm">FILE</span>
+        </div>
+      `;
+      previewContainer.appendChild(genericIcon);
     }
+
+    li.appendChild(previewContainer);
 
     const text = document.createElement("p");
     text.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
-    text.classList.add("flex-1");
+    text.classList.add("flex-1", "text-sm", "mt-2");
     li.appendChild(text);
 
-    // ปุ่มลบไฟล์
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.textContent = "❌";
-    removeBtn.classList.add("text-red-600", "hover:text-red-800", "ml-2");
+    removeBtn.classList.add("text-red-600", "hover:text-red-800", "ml-2", "mt-2");
     removeBtn.addEventListener("click", () => {
-      selectedFiles.splice(index, 1); // ลบไฟล์ใน array
-      renderFileList(selectedFiles);   // รีเรนเดอร์ใหม่
-      // ถ้าต้องการซิงค์กับ input file (แต่ input file ควบคุมยาก)
+      selectedFiles.splice(index, 1);
+      renderFileList(selectedFiles);
     });
     li.appendChild(removeBtn);
 
@@ -930,31 +938,57 @@ async function loadAllCustomers() {
     dropZone.addEventListener("click", () => attachmentInput.click());
 
     // เลือกไฟล์จาก input
-    attachmentInput.addEventListener("change", (e) => {
-      selectedFiles = Array.from(e.target.files);
-      renderFileList(selectedFiles);
-    });
+   attachmentInput.addEventListener("change", (e) => {
+  const newFiles = Array.from(e.target.files);
+
+  // รวมไฟล์ใหม่กับเก่า (กันชื่อซ้ำด้วย)
+  const all = [...selectedFiles, ...newFiles];
+
+  // กรองซ้ำชื่อ (อิงชื่อไฟล์ + ขนาด)
+  const unique = [];
+  const seen = new Set();
+
+  for (const f of all) {
+    const key = f.name + "_" + f.size;
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(f);
+    }
+  }
+
+  selectedFiles = unique;
+  renderFileList(selectedFiles);
+
+  // เคลียร์ input เพื่อให้สามารถเลือกไฟล์เดิมซ้ำได้อีกครั้งถ้าลบ
+  attachmentInput.value = "";
+});
 
     // Drag Over
-    dropZone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropZone.classList.add("border-blue-400", "bg-blue-50", "dark:bg-gray-600");
-    });
+   dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("border-blue-400", "bg-blue-50", "dark:bg-gray-600");
 
+  if (e.dataTransfer.files.length) {
+    const newFiles = Array.from(e.dataTransfer.files);
+    const all = [...selectedFiles, ...newFiles];
+
+    const unique = [];
+    const seen = new Set();
+    for (const f of all) {
+      const key = f.name + "_" + f.size;
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(f);
+      }
+    }
+
+    selectedFiles = unique;
+    renderFileList(selectedFiles);
+  }
+});
     // Drag Leave
     dropZone.addEventListener("dragleave", () => {
       dropZone.classList.remove("border-blue-400", "bg-blue-50", "dark:bg-gray-600");
-    });
-
-    // Drop
-    dropZone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("border-blue-400", "bg-blue-50", "dark:bg-gray-600");
-
-      if (e.dataTransfer.files.length) {
-        selectedFiles = Array.from(e.dataTransfer.files);
-        renderFileList(selectedFiles);
-      }
     });
 
     // ฟอร์มส่งอีเมล
@@ -1091,7 +1125,7 @@ document.getElementById("emailForm").addEventListener("submit", async (event) =>
        }
 
        if (data.department !== 'ฝ่ายขายและการตลาด') {
-         alert('หน้านี้เข้าได้เฉพาะฝ่ายการตลาด');
+         alert('หน้านี้เข้าได้เฉพาะฝ่ายขายและการตลาด');
          // ซ่อนเนื้อหาทั้งหมด หรือแทนที่ด้วยข้อความแจ้งสิทธิ์
           window.location.href = 'index.html';  // กลับไปหน้า index
          return;
